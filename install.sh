@@ -44,10 +44,7 @@ mount -L "${EFI_LABEL}" "${BOOT_PATH}"
 swapon -L "${SWAP_LABEL}"
 
 # Install Base System
-pacstrap -K "${MOUNT_DIR}" base linux linux-firmware grub efibootmgr sudo
-    #sudo base-devel git util-linux networkmanager \
-    #pipewire pipewire-audio wireplumber gptfdisk sddm plasma-meta reflector openssh man \
-    #systemd-resolvconf cups print-manager qt5-declarative flatpak
+pacstrap -K "${MOUNT_DIR}" base linux linux-firmware sudo
 
 # Generate an fstab using labels.
 genfstab -L -p "${MOUNT_DIR}" >>"${MOUNT_DIR}/etc/fstab"
@@ -62,7 +59,7 @@ sed -i '/en_US\.UTF-8 UTF-8/s/^#//g' "${MOUNT_DIR}/etc/locale.gen"
 sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^# //g' "${MOUNT_DIR}/etc/sudoers"
 
 # Use systemd-nspawn to configure the rest of the system from inside a container, running another install script.
-systemd-nspawn --boot --notify-ready=yes --machine=installer --console=passive --bind=".:/scripts" --directory="${MOUNT_DIR}" $
+systemd-nspawn --boot --notify-ready=yes --machine=installer --console=passive --bind=".:/scripts" --directory="${MOUNT_DIR}" &
 systemd-run --wait --machine=installer "/bin/bash /scripts/install2.sh; poweroff"
 
 arch-chroot "${MOUNT_DIR}" "grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB; grub-mkconfig -o /boot/grub/grub.cfg"
