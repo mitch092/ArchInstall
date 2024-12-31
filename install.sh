@@ -68,8 +68,7 @@ sed -i 's/^#\(%wheel ALL=(ALL:ALL) ALL\)/\1/' "${MOUNT_DIR}/etc/sudoers"
 
 # Use systemd-nspawn to configure the rest of the system from inside a container, running another install script.
 systemd-nspawn --boot --notify-ready=yes --machine=installer --console=passive --bind=".:/scripts" --directory="${MOUNT_DIR}"
-systemd-run --pipe --machine=installer "/bin/bash /scripts/install2.sh"
-machinectl poweroff installer
+systemd-run --pipe --machine=installer "/bin/bash /scripts/install2.sh; poweroff"
 
 # Create a symbolic link for the systemd-resolved stub to resolv.conf.
 ln -sf "../run/systemd/resolve/stub-resolv.conf" "${MOUNT_DIR}/etc/resolv.conf"
