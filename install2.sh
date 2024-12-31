@@ -3,19 +3,17 @@
 set -e
 
 # User set variables.
-HOST_NAME="Vengeance"
+HOST_NAME="vengeance"
 ROOT_PASSWORD="changeme"
-FIRST_USER="Steven"
+FIRST_USER="steven"
 FIRST_USER_PASSWORD="changeme"
 
-# Auto variables.
-TEMP_YAY="/tmp/yay"
-
 # Enable various services.
-systemctl enable systemd-timesyncd.service --now
-systemctl enable systemd-resolved.service --now
-systemctl enable NetworkManager.service --now
-systemctl enable fstrim.timer --now
+systemctl enable systemd-timesyncd.service
+systemctl enable systemd-resolved.service
+systemctl enable NetworkManager.service
+systemctl enable fstrim.timer
+systemctl enable sddm.service
 
 # Set time and date.
 timedatectl set-timezone America/Los_Angeles
@@ -31,18 +29,6 @@ hostnamectl set-hostname "${HOST_NAME}"
 echo "root:${ROOT_PASSWORD}" | chpasswd
 useradd -m -G wheel -s /bin/bash "${FIRST_USER}"
 echo "${FIRST_USER}:${FIRST_USER_PASSWORD}" | chpasswd
-
-# Install necessary software.
-sudo -u arch yay -S --noconfirm cachyos-keyring cachyos-mirrorlist linux-cachyos \
-  pipewire pipewire-alsa pipewire-jack pipewire-pulse wireplumber bottles networkmanager \
-  nvidia nvidia-utils nvidia-settings kde-plasma-desktop grub efibootmgr reflector openssh man \
-  systemd-resolvconf
-
-# Install yay.
-mkdir -p "${TEMP_YAY}"
-git clone https://aur.archlinux.org/yay.git "${TEMP_YAY}"
-cd "${TEMP_YAY}"
-makepkg -si --noconfirm
 
 # Configure bootloader.
 grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB

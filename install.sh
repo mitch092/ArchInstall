@@ -42,7 +42,11 @@ mount -L "${EFI_LABEL}" "${BOOT_PATH}"
 swapon -L "${SWAP_LABEL}"
 
 # Install Base System
-pacstrap -K "${MOUNT_DIR}" base linux linux-firmware sudo base-devel git util-linux networkmanager
+pacstrap -K "${MOUNT_DIR}" base linux linux-firmware sudo base-devel git util-linux networkmanager \
+    pipewire pipewire-alsa pipewire-jack pipewire-pulse wireplumber gptfdisk \
+    sddm plasma-meta \
+    grub efibootmgr reflector openssh man \
+    systemd-resolvconf cups print-manager qt5-declarative flatpak
 
 # Generate an fstab using labels.
 genfstab -L -p "${MOUNT_DIR}" >>"${MOUNT_DIR}/etc/fstab"
@@ -64,4 +68,4 @@ systemd-nspawn --boot --directory="${MOUNT_DIR}" "/bin/bash install2.sh"
 
 # Final Steps
 umount -R "${MOUNT_DIR}"
-reboot
+#reboot
