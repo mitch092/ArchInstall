@@ -20,10 +20,6 @@ echo "127.0.0.1   localhost" >/etc/hosts
 echo "::1         localhost" >>/etc/hosts
 echo "127.0.1.1   myhostname.localdomain myhostname" >>/etc/hosts
 
-# Configure DNS resolver
-ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
-
-
 # Enable hardware clock synchronization
 hwclock --systohc
 
@@ -47,8 +43,6 @@ sudo -u arch yay -S --noconfirm cachyos-keyring cachyos-mirrorlist linux-cachyos
 # Configure bootloader
 grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
 grub-mkconfig -o /boot/grub/grub.cfg
-
-
 
 # Final Steps
 umount -R "$MOUNT_DIR"
