@@ -23,9 +23,9 @@ sgdisk --zap-all --clear \
     --new=3:0:0 --typecode=3:8300 --change-name=3:$ROOT_LABEL "$DISK"
 
 # Format Partitions
-mkfs.fat -F32 "${DISK}1"
-mkswap "${DISK}2"
-mkfs.f2fs "${DISK}3"
+mkfs.fat -F32 -n "$EFI_LABEL" "/dev/disk/by-partlabel/$EFI_LABEL"
+mkswap -L "$SWAP_LABEL" "/dev/disk/by-partlabel/$SWAP_LABEL"
+mkfs.f2fs "/dev/disk/by-partlabel/$ROOT_LABEL"
 
 # Mount Partitions
 mkdir -p "$MOUNT_DIR"
@@ -39,7 +39,7 @@ pacstrap -K "$MOUNT_DIR" base base-devel git linux linux-firmware sudo
 
 # Prepare for systemd-nspawn
 genfstab -U "$MOUNT_DIR" >>"$MOUNT_DIR/etc/fstab"
-cp /etc/resolv.conf "$MOUNT_DIR/etc/resolv.conf"
+ln -sf "../run/systemd/resolve/stub-resolv.conf" "$MOUNT_DIR/etc/resolv.conf"
 
 # Use systemd-nspawn to configure the system
 systemd-nspawn -bD "$MOUNT_DIR" /bin/bash install2.sh
