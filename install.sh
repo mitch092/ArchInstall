@@ -20,12 +20,6 @@ SWAP_PATH="${LABEL_PATH}${SWAP_LABEL}"
 ROOT_PATH="${LABEL_PATH}${ROOT_LABEL}"
 BOOT_PATH="${MOUNT_DIR}/boot"
 
-# Update system clock.
-timedatectl set-ntp true
-
-# Enable DNS resolution if it's not already started.
-systemctl start systemd-resolved.service
-
 # Update all packages to latest.
 pacman -Syu --noconfirm
 
