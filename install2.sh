@@ -2,26 +2,27 @@
 
 set -e
 
-# Set locale
-echo "en_US.UTF-8 UTF-8" >>/etc/locale.gen
-locale-gen
-localectl set-locale LANG=en_US.UTF-8
-
+# Enable variou services.
 systemctl enable systemd-timesyncd.service
 systemctl enable systemd-resolved
 systemctl enable NetworkManager
 systemctl enable fstrim.timer
 
+# Set time and date.
 timedatectl set-timezone America/Los_Angeles
+
+# Set locale
+echo "en_US.UTF-8 UTF-8" >>/etc/locale.gen
+locale-gen
+localectl set-locale LANG=en_US.UTF-8
+
+# Set hostname.
 hostnamectl set-hostname myhostname
 
 # Setup hosts file
 echo "127.0.0.1   localhost" >/etc/hosts
 echo "::1         localhost" >>/etc/hosts
 echo "127.0.1.1   myhostname.localdomain myhostname" >>/etc/hosts
-
-# Enable hardware clock synchronization
-hwclock --systohc
 
 # Configure root password and add user
 echo "root:password" | chpasswd

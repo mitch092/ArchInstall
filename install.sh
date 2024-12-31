@@ -49,7 +49,7 @@ genfstab -L "${MOUNT_DIR}" >>"${MOUNT_DIR}/etc/fstab"
 ln -sf "../run/systemd/resolve/stub-resolv.conf" "${MOUNT_DIR}/etc/resolv.conf"
 
 # Use systemd-nspawn to configure the system
-systemd-nspawn -bD "${MOUNT_DIR}" /bin/bash install2.sh
+systemd-nspawn --boot --directory="${MOUNT_DIR}" "/bin/bash install2.sh"
 
 # Final Steps
 umount -R "${MOUNT_DIR}"
