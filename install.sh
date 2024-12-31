@@ -43,7 +43,7 @@ swapon -L "${SWAP_LABEL}"
 
 # Install Base System
 pacstrap -K "${MOUNT_DIR}" base linux linux-firmware sudo base-devel git util-linux networkmanager \
-    pipewire pipewire-alsa pipewire-jack pipewire-pulse wireplumber gptfdisk \
+    pipewire pipewire-audio wireplumber gptfdisk \
     sddm plasma-meta \
     grub efibootmgr reflector openssh man \
     systemd-resolvconf cups print-manager qt5-declarative flatpak
@@ -68,4 +68,4 @@ systemd-nspawn --boot --directory="${MOUNT_DIR}" "/bin/bash install2.sh"
 
 # Final Steps
 umount -R "${MOUNT_DIR}"
-#reboot
+echo "Install finished. Ready to reboot."
