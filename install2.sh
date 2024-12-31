@@ -2,49 +2,48 @@
 
 set -e
 
-# Enable variou services.
-systemctl enable systemd-timesyncd.service
-systemctl enable systemd-resolved
-systemctl enable NetworkManager
-systemctl enable fstrim.timer
+# User set variables.
+HOST_NAME="Vengeance"
+ROOT_PASSWORD="changeme"
+FIRST_USER="Steven"
+FIRST_USER_PASSWORD="changeme"
+
+# Auto variables.
+TEMP_YAY="/tmp/yay"
+
+# Enable various services.
+systemctl enable systemd-timesyncd.service --now
+systemctl enable systemd-resolved.service --now
+systemctl enable NetworkManager.service --now
+systemctl enable fstrim.timer --now
 
 # Set time and date.
 timedatectl set-timezone America/Los_Angeles
 
 # Set locale
-echo "en_US.UTF-8 UTF-8" >>/etc/locale.gen
 locale-gen
 localectl set-locale LANG=en_US.UTF-8
 
 # Set hostname.
-hostnamectl set-hostname myhostname
+hostnamectl set-hostname "${HOST_NAME}"
 
-# Setup hosts file
-echo "127.0.0.1   localhost" >/etc/hosts
-echo "::1         localhost" >>/etc/hosts
-echo "127.0.1.1   myhostname.localdomain myhostname" >>/etc/hosts
+# Configure root password and add a non-root user.
+echo "root:${ROOT_PASSWORD}" | chpasswd
+useradd -m -G wheel -s /bin/bash "${FIRST_USER}"
+echo "${FIRST_USER}:${FIRST_USER_PASSWORD}" | chpasswd
 
-# Configure root password and add user
-echo "root:password" | chpasswd
-useradd -m -G wheel -s /bin/bash arch
-echo "arch:password" | chpasswd
-echo "%wheel ALL=(ALL:ALL) ALL" >>/etc/sudoers
-
-# Install yay
-pacman -Sy --noconfirm git base-devel
-git clone https://aur.archlinux.org/yay.git /tmp/yay
-chown -R arch:arch /tmp/yay
-cd /tmp/yay && sudo -u arch makepkg -si --noconfirm
-
-# Install necessary software
+# Install necessary software.
 sudo -u arch yay -S --noconfirm cachyos-keyring cachyos-mirrorlist linux-cachyos \
   pipewire pipewire-alsa pipewire-jack pipewire-pulse wireplumber bottles networkmanager \
-  nvidia nvidia-utils nvidia-settings kde-plasma-desktop grub efibootmgr reflector openssh man
+  nvidia nvidia-utils nvidia-settings kde-plasma-desktop grub efibootmgr reflector openssh man \
+  systemd-resolvconf
 
-# Configure bootloader
+# Install yay.
+mkdir -p "${TEMP_YAY}"
+git clone https://aur.archlinux.org/yay.git "${TEMP_YAY}"
+cd "${TEMP_YAY}"
+makepkg -si --noconfirm
+
+# Configure bootloader.
 grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
 grub-mkconfig -o /boot/grub/grub.cfg
-
-# Final Steps
-umount -R "$MOUNT_DIR"
-reboot
