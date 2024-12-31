@@ -1,27 +1,30 @@
 #!/bin/bash
 
+set -e
+
 # Variables
 DISK="/dev/sda"
-EFI_SIZE="512M"
-SWAP_SIZE="4G"
-ROOT_LABEL="arch_root"
-EFI_LABEL="arch_efi"
-SWAP_LABEL="arch_swap"
-MOUNT_DIR="/mnt/arch"
+MOUNT_DIR="/mnt"
+
+EFI_SIZE="550MiB"
+SWAP_SIZE="8GiB"
+
+EFI_LABEL="EFI"
+SWAP_LABEL="swap"
+ROOT_LABEL="root"
 
 # Update system clock
-timedatectl set-ntp true
+systemctl enable systemd-timesyncd.service
 
 # Partition Disk
 sgdisk --zap-all --clear \
-    -n 1:0:+$EFI_SIZE -t 1:ef00 -c 1:$EFI_LABEL \
-    -n 2:0:+$SWAP_SIZE -t 2:8200 -c 2:$SWAP_LABEL \
-    -n 3:0:0 -t 3:8300 -c 3:$ROOT_LABEL "$DISK"
+    --new=1:0:+$EFI_SIZE --typecode=1:ef00 --change-name=1:$EFI_LABEL \
+    --new=2:0:+$SWAP_SIZE --typecode=2:8200 --change-name=2:$SWAP_LABEL \
+    --new=3:0:0 --typecode=3:8300 --change-name=3:$ROOT_LABEL "$DISK"
 
 # Format Partitions
 mkfs.fat -F32 "${DISK}1"
 mkswap "${DISK}2"
-swapon "${DISK}2"
 mkfs.f2fs "${DISK}3"
 
 # Mount Partitions
@@ -29,9 +32,10 @@ mkdir -p "$MOUNT_DIR"
 mount "${DISK}3" "$MOUNT_DIR"
 mkdir -p "$MOUNT_DIR/boot"
 mount "${DISK}1" "$MOUNT_DIR/boot"
+swapon "${DISK}2"
 
 # Install Base System
-pacstrap "$MOUNT_DIR" base linux linux-firmware sudo
+pacstrap -K "$MOUNT_DIR" base base-devel git linux linux-firmware sudo
 
 # Prepare for systemd-nspawn
 genfstab -U "$MOUNT_DIR" >>"$MOUNT_DIR/etc/fstab"

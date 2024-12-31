@@ -3,12 +3,15 @@
 set -e
 
 # Set locale
-echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
+echo "en_US.UTF-8 UTF-8" >>/etc/locale.gen
 locale-gen
 localectl set-locale LANG=en_US.UTF-8
 
-# Configure timezone and hostname
-timedatectl set-ntp true
+systemctl enable systemd-timesyncd.service
+systemctl enable systemd-resolved
+systemctl enable NetworkManager
+systemctl enable fstrim.timer
+
 timedatectl set-timezone America/Los_Angeles
 hostnamectl set-hostname myhostname
 
@@ -19,7 +22,7 @@ echo "127.0.1.1   myhostname.localdomain myhostname" >>/etc/hosts
 
 # Configure DNS resolver
 ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
-systemctl enable systemd-resolved
+
 
 # Enable hardware clock synchronization
 hwclock --systohc
@@ -38,18 +41,14 @@ cd /tmp/yay && sudo -u arch makepkg -si --noconfirm
 
 # Install necessary software
 sudo -u arch yay -S --noconfirm cachyos-keyring cachyos-mirrorlist linux-cachyos \
-  pipewire pipewire-alsa pipewire-jack pipewire-pulse bottles networkmanager \
-  nvidia nvidia-utils nvidia-settings kde-plasma-desktop grub efibootmgr
+  pipewire pipewire-alsa pipewire-jack pipewire-pulse wireplumber bottles networkmanager \
+  nvidia nvidia-utils nvidia-settings kde-plasma-desktop grub efibootmgr reflector openssh man
 
 # Configure bootloader
 grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
 grub-mkconfig -o /boot/grub/grub.cfg
 
-# Enable NetworkManager
-systemctl enable NetworkManager
 
-# Enable SSD optimizations
-systemctl enable fstrim.timer
 
 # Final Steps
 umount -R "$MOUNT_DIR"
