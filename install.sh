@@ -20,9 +20,6 @@ SWAP_PATH="${LABEL_PATH}${SWAP_LABEL}"
 ROOT_PATH="${LABEL_PATH}${ROOT_LABEL}"
 BOOT_PATH="${MOUNT_DIR}/boot"
 
-# Update all packages to latest.
-pacman -Syu --noconfirm
-
 # Partition Disk
 sgdisk "--zap-all --clear \
     --new=1:0:+${EFI_SIZE} --typecode=1:ef00 --change-name=1:${EFI_LABEL} \
