@@ -24,12 +24,8 @@ echo "root:${ROOT_PASSWORD}" | chpasswd
 useradd -m -G wheel -s /bin/bash "${FIRST_USER}"
 echo "${FIRST_USER}:${FIRST_USER_PASSWORD}" | chpasswd
 
-# Configure bootloader.
-grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
-grub-mkconfig -o /boot/grub/grub.cfg
-
 # Enable various services.
-#systemctl enable systemd-resolved.service
-#systemctl enable NetworkManager.service
-#systemctl enable fstrim.timer
+systemctl enable systemd-resolved.service
+systemctl enable NetworkManager.service
+systemctl enable fstrim.timer
 #systemctl enable sddm.service

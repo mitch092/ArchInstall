@@ -62,8 +62,10 @@ sed -i '/en_US\.UTF-8 UTF-8/s/^#//g' "${MOUNT_DIR}/etc/locale.gen"
 sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^# //g' "${MOUNT_DIR}/etc/sudoers"
 
 # Use systemd-nspawn to configure the rest of the system from inside a container, running another install script.
-systemd-nspawn --boot --notify-ready=yes --machine=installer --console=passive --bind=".:/scripts" --directory="${MOUNT_DIR}"
-systemd-run --pipe --machine=installer "/bin/bash /scripts/install2.sh; poweroff"
+systemd-nspawn --boot --notify-ready=yes --machine=installer --console=passive --bind=".:/scripts" --directory="${MOUNT_DIR}" $
+systemd-run --wait --machine=installer "/bin/bash /scripts/install2.sh; poweroff"
+
+arch-chroot "${MOUNT_DIR}" "grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB; grub-mkconfig -o /boot/grub/grub.cfg"
 
 # Create a symbolic link for the systemd-resolved stub to resolv.conf.
 ln -sf "../run/systemd/resolve/stub-resolv.conf" "${MOUNT_DIR}/etc/resolv.conf"
