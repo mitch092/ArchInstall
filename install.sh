@@ -29,7 +29,7 @@ sgdisk --zap-all --clear \
 # Format Partitions
 mkfs.fat -F32 -n "${EFI_LABEL}" "${DISK}1"
 mkswap -L "${SWAP_LABEL}" "${DISK}2"
-mkfs.f2fs -l "${ROOT_LABEL}" "${DISK}3"
+mkfs.f2fs -f -l "${ROOT_LABEL}" "${DISK}3"
 
 # Mount Partitions
 mkdir -p "${MOUNT_DIR}"
@@ -41,7 +41,7 @@ swapon -L "${SWAP_LABEL}"
 # Install Base System
 pacstrap -K "${MOUNT_DIR}" base linux linux-firmware sudo base-devel git util-linux networkmanager \
     pipewire pipewire-audio wireplumber gptfdisk sddm plasma-meta grub efibootmgr reflector openssh man \
-    systemd-resolvconf cups print-manager qt5-declarative flatpak steam blender godot godot-mono
+    systemd-resolvconf cups print-manager qt5-declarative flatpak
 
 # Generate an fstab using labels.
 genfstab -L -p "${MOUNT_DIR}" >>"${MOUNT_DIR}/etc/fstab"
@@ -50,10 +50,10 @@ genfstab -L -p "${MOUNT_DIR}" >>"${MOUNT_DIR}/etc/fstab"
 sed -i '/^hosts:/ s/files/files myhostname' "${MOUNT_DIR}/etc/nsswitch.conf"
 
 # Uncomment a locale for locale-gen.
-sed -i 's/^#\(en_US\.UTF-8 UTF-8\)/\1/' "${MOUNT_DIR}/etc/locale.gen"
+sed -i '/en_US\.UTF-8 UTF-8/s/^#//g' "${MOUNT_DIR}/etc/locale.gen"
 
 # Uncomment the wheel group in the sudoers file.
-sed -i 's/^#\(%wheel ALL=(ALL:ALL) ALL\)/\1/' "${MOUNT_DIR}/etc/sudoers"
+sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^# //g' "${MOUNT_DIR}/etc/sudoers"
 
 # Use systemd-nspawn to configure the rest of the system from inside a container, running another install script.
 systemd-nspawn --boot --notify-ready=yes --machine=installer --console=passive --bind=".:/scripts" --directory="${MOUNT_DIR}"
