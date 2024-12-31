@@ -26,6 +26,9 @@ systemctl start systemd-timesyncd.service
 # Enable DNS resolution if it's not already started.
 systemctl start systemd-resolved.service
 
+# Update all packages to latest.
+pacman -Syu --noconfirm
+
 # Partition Disk
 sgdisk "--zap-all --clear \
     --new=1:0:+${EFI_SIZE} --typecode=1:ef00 --change-name=1:${EFI_LABEL} \
@@ -64,7 +67,9 @@ sed -i 's/^#\(en_US\.UTF-8 UTF-8\)/\1/' "${MOUNT_DIR}/etc/locale.gen"
 sed -i 's/^#\(%wheel ALL=(ALL:ALL) ALL\)/\1/' "${MOUNT_DIR}/etc/sudoers"
 
 # Use systemd-nspawn to configure the rest of the system from inside a container, running another install script.
-echo "/bin/bash install2.sh; poweroff" | systemd-nspawn --boot --directory="${MOUNT_DIR}"
+systemd-nspawn --boot --notify-ready=yes --machine=installer --console=passive --bind=".:/scripts" --directory="${MOUNT_DIR}"
+systemd-run --pipe --machine=installer "/bin/bash /scripts/install2.sh"
+machinectl poweroff installer
 
 # Create a symbolic link for the systemd-resolved stub to resolv.conf.
 ln -sf "../run/systemd/resolve/stub-resolv.conf" "${MOUNT_DIR}/etc/resolv.conf"
