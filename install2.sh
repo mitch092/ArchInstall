@@ -15,12 +15,12 @@ systemctl enable NetworkManager.service
 systemctl enable fstrim.timer
 systemctl enable sddm.service
 
-# Set time and date.
-timedatectl set-timezone America/Los_Angeles
-
 # Set locale
 locale-gen
 localectl set-locale LANG=en_US.UTF-8
+
+# Set time and date.
+timedatectl set-timezone America/Los_Angeles
 
 # Set hostname.
 hostnamectl set-hostname "${HOST_NAME}"

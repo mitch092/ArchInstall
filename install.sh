@@ -23,6 +23,9 @@ BOOT_PATH="${MOUNT_DIR}/boot"
 # Update system clock.
 systemctl start systemd-timesyncd.service
 
+# Enable DNS resolution if it's not already started.
+systemctl start systemd-resolved.service
+
 # Partition Disk
 sgdisk "--zap-all --clear \
     --new=1:0:+${EFI_SIZE} --typecode=1:ef00 --change-name=1:${EFI_LABEL} \
@@ -51,20 +54,20 @@ pacstrap -K "${MOUNT_DIR}" base linux linux-firmware sudo base-devel git util-li
 # Generate an fstab using labels.
 genfstab -L -p "${MOUNT_DIR}" >>"${MOUNT_DIR}/etc/fstab"
 
-# Create a link for the systemd-resolved stub to resolv.conf.
-ln -sf "../run/systemd/resolve/stub-resolv.conf" "${MOUNT_DIR}/etc/resolv.conf"
-
 # Enable nss-myhostname instead of changing /etc/hosts.
 sed -i '/^hosts:/ s/files/files myhostname' "${MOUNT_DIR}/etc/nsswitch.conf"
 
-# Uncomment a locale to generate files for.
+# Uncomment a locale for locale-gen.
 sed -i 's/^#\(en_US\.UTF-8 UTF-8\)/\1/' "${MOUNT_DIR}/etc/locale.gen"
 
 # Uncomment the wheel group in the sudoers file.
 sed -i 's/^#\(%wheel ALL=(ALL:ALL) ALL\)/\1/' "${MOUNT_DIR}/etc/sudoers"
 
 # Use systemd-nspawn to configure the rest of the system from inside a container, running another install script.
-systemd-nspawn --boot --directory="${MOUNT_DIR}" "/bin/bash install2.sh"
+echo "/bin/bash install2.sh; poweroff" | systemd-nspawn --boot --directory="${MOUNT_DIR}"
+
+# Create a symbolic link for the systemd-resolved stub to resolv.conf.
+ln -sf "../run/systemd/resolve/stub-resolv.conf" "${MOUNT_DIR}/etc/resolv.conf"
 
 # Final Steps
 umount -R "${MOUNT_DIR}"
