@@ -8,14 +8,14 @@ ROOT_PASSWORD="changeme"
 FIRST_USER="steven"
 FIRST_USER_PASSWORD="changeme"
 
-# Set locale
-locale-gen
-localectl set-locale LANG=en_US.UTF-8
-
 # Set time and date.
 timedatectl set-ntp true
 timedatectl set-timezone America/Los_Angeles
 hwclock --systohc
+
+# Set locale
+locale-gen
+localectl set-locale LANG=en_US.UTF-8
 
 # Set hostname.
 hostnamectl set-hostname "${HOST_NAME}"
