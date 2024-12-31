@@ -47,7 +47,7 @@ pacstrap -K "${MOUNT_DIR}" base linux linux-firmware sudo base-devel git util-li
 genfstab -L -p "${MOUNT_DIR}" >>"${MOUNT_DIR}/etc/fstab"
 
 # Enable nss-myhostname instead of changing /etc/hosts.
-sed -i '/^hosts:/ s/files/files myhostname' "${MOUNT_DIR}/etc/nsswitch.conf"
+sed -i '/^hosts:/ s/files dns/files myhostname dns/' "${MOUNT_DIR}/etc/nsswitch.conf"
 
 # Uncomment a locale for locale-gen.
 sed -i '/en_US\.UTF-8 UTF-8/s/^#//g' "${MOUNT_DIR}/etc/locale.gen"
