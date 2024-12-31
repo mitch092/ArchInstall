@@ -52,7 +52,7 @@ pacstrap -K "${MOUNT_DIR}" base linux linux-firmware sudo base-devel git util-li
     pipewire pipewire-audio wireplumber gptfdisk \
     sddm plasma-meta \
     grub efibootmgr reflector openssh man \
-    systemd-resolvconf cups print-manager qt5-declarative flatpak
+    systemd-resolvconf cups print-manager qt5-declarative flatpak steam blender godot godot-mono
 
 # Generate an fstab using labels.
 genfstab -L -p "${MOUNT_DIR}" >>"${MOUNT_DIR}/etc/fstab"
