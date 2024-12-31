@@ -55,13 +55,13 @@ genfstab -L -p "${MOUNT_DIR}" >>"${MOUNT_DIR}/etc/fstab"
 ln -sf "../run/systemd/resolve/stub-resolv.conf" "${MOUNT_DIR}/etc/resolv.conf"
 
 # Enable nss-myhostname instead of changing /etc/hosts.
-sed -i s+files dns+files myhostname dns+ "${MOUNT_DIR}/etc/nsswitch.conf"
+sed -i '/^hosts:/ s/files/files myhostname' "${MOUNT_DIR}/etc/nsswitch.conf"
 
-# Enable a locale.
-echo "en_US.UTF-8 UTF-8" >>"${MOUNT_DIR}/etc/locale.gen"
+# Uncomment a locale to generate files for.
+sed -i 's/^#\(en_US\.UTF-8 UTF-8\)/\1/' "${MOUNT_DIR}/etc/locale.gen"
 
-# Add the wheel group to the sudoers file.
-echo "%wheel ALL=(ALL:ALL) ALL" >>"${MOUNT_DIR}/etc/sudoers"
+# Uncomment the wheel group in the sudoers file.
+sed -i 's/^#\(%wheel ALL=(ALL:ALL) ALL\)/\1/' "${MOUNT_DIR}/etc/sudoers"
 
 # Use systemd-nspawn to configure the rest of the system from inside a container, running another install script.
 systemd-nspawn --boot --directory="${MOUNT_DIR}" "/bin/bash install2.sh"
