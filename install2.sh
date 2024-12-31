@@ -8,19 +8,14 @@ ROOT_PASSWORD="changeme"
 FIRST_USER="steven"
 FIRST_USER_PASSWORD="changeme"
 
-# Enable various services.
-systemctl enable systemd-timesyncd.service
-systemctl enable systemd-resolved.service
-systemctl enable NetworkManager.service
-systemctl enable fstrim.timer
-systemctl enable sddm.service
-
 # Set locale
 locale-gen
 localectl set-locale LANG=en_US.UTF-8
 
 # Set time and date.
+timedatectl set-ntp true
 timedatectl set-timezone America/Los_Angeles
+hwclock --systohc
 
 # Set hostname.
 hostnamectl set-hostname "${HOST_NAME}"
@@ -33,3 +28,9 @@ echo "${FIRST_USER}:${FIRST_USER_PASSWORD}" | chpasswd
 # Configure bootloader.
 grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
 grub-mkconfig -o /boot/grub/grub.cfg
+
+# Enable various services.
+systemctl enable systemd-resolved.service
+systemctl enable NetworkManager.service
+systemctl enable fstrim.timer
+systemctl enable sddm.service
