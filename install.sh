@@ -21,15 +21,15 @@ ROOT_PATH="${LABEL_PATH}${ROOT_LABEL}"
 BOOT_PATH="${MOUNT_DIR}/boot"
 
 # Partition Disk
-sgdisk "--zap-all --clear \
-    --new=1:0:+${EFI_SIZE} --typecode=1:ef00 --change-name=1:${EFI_LABEL} \
-    --new=2:0:+${SWAP_SIZE} --typecode=2:8200 --change-name=2:${SWAP_LABEL} \
-    --new=3:0:0 --typecode=3:8300 --change-name=3:${ROOT_LABEL} ${DISK}"
+sgdisk --zap-all --clear \
+    --new=1:0:+${EFI_SIZE} --typecode=1:ef00 \
+    --new=2:0:+${SWAP_SIZE} --typecode=2:8200 \
+    --new=3:0:0 --typecode=3:8300 ${DISK}
 
 # Format Partitions
-mkfs.fat -F32 -n "${EFI_LABEL}" "${EFI_PATH}"
-mkswap -L "${SWAP_LABEL}" "${SWAP_PATH}"
-mkfs.f2fs -l "${ROOT_LABEL}" "${ROOT_PATH}"
+mkfs.fat -F32 -n "${EFI_LABEL}" "${DISK}1"
+mkswap -L "${SWAP_LABEL}" "${DISK}2"
+mkfs.f2fs -l "${ROOT_LABEL}" "${DISK}3"
 
 # Mount Partitions
 mkdir -p "${MOUNT_DIR}"
