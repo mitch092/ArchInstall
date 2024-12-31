@@ -43,9 +43,7 @@ swapon -L "${SWAP_LABEL}"
 
 # Install Base System
 pacstrap -K "${MOUNT_DIR}" base linux linux-firmware sudo base-devel git util-linux networkmanager \
-    pipewire pipewire-audio wireplumber gptfdisk \
-    sddm plasma-meta \
-    grub efibootmgr reflector openssh man \
+    pipewire pipewire-audio wireplumber gptfdisk sddm plasma-meta grub efibootmgr reflector openssh man \
     systemd-resolvconf cups print-manager qt5-declarative flatpak steam blender godot godot-mono
 
 # Generate an fstab using labels.
