@@ -20,6 +20,11 @@ SWAP_PATH="${LABEL_PATH}${SWAP_LABEL}"
 ROOT_PATH="${LABEL_PATH}${ROOT_LABEL}"
 BOOT_PATH="${MOUNT_DIR}/boot"
 
+# Set hardware clock.
+timedatectl set-ntp true
+timedatectl set-timezone America/Los_Angeles
+hwclock --systohc
+
 # Partition Disk
 sgdisk --zap-all --clear \
     --new=1:0:+${EFI_SIZE} --typecode=1:ef00 \
@@ -39,9 +44,10 @@ mount -L "${EFI_LABEL}" "${BOOT_PATH}"
 swapon -L "${SWAP_LABEL}"
 
 # Install Base System
-pacstrap -K "${MOUNT_DIR}" base linux linux-firmware sudo base-devel git util-linux networkmanager \
-    pipewire pipewire-audio wireplumber gptfdisk sddm plasma-meta grub efibootmgr reflector openssh man \
-    systemd-resolvconf cups print-manager qt5-declarative flatpak
+pacstrap -K "${MOUNT_DIR}" base linux linux-firmware grub efibootmgr sudo
+    #sudo base-devel git util-linux networkmanager \
+    #pipewire pipewire-audio wireplumber gptfdisk sddm plasma-meta reflector openssh man \
+    #systemd-resolvconf cups print-manager qt5-declarative flatpak
 
 # Generate an fstab using labels.
 genfstab -L -p "${MOUNT_DIR}" >>"${MOUNT_DIR}/etc/fstab"

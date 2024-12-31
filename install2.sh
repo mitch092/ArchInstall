@@ -11,7 +11,6 @@ FIRST_USER_PASSWORD="changeme"
 # Set time and date.
 timedatectl set-ntp true
 timedatectl set-timezone America/Los_Angeles
-hwclock --systohc
 
 # Set locale
 locale-gen
@@ -30,7 +29,7 @@ grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # Enable various services.
-systemctl enable systemd-resolved.service
-systemctl enable NetworkManager.service
-systemctl enable fstrim.timer
-systemctl enable sddm.service
+#systemctl enable systemd-resolved.service
+#systemctl enable NetworkManager.service
+#systemctl enable fstrim.timer
+#systemctl enable sddm.service
