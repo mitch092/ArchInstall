@@ -1,5 +1,5 @@
 # Modern Automated Arch Linux Install Script
-This is my custom Arch Linux install script. Systemd components in the "base" package are used as much as possible, to make installation quick and minimal. 
+This is my custom Arch Linux install script. It uses systemd components in the "base" package as much as possible, to make installation quick and minimal. 
 
 Some highlights:
 * UKI kernel: Simplifies kernel management and booting. Also possibly faster than keeping initramfs separate.
