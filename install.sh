@@ -44,7 +44,7 @@ pacstrap -K $MOUNT_DIR base sudo vim
 
 systemd-firstboot --root=$MOUNT_DIR --locale=en_US.UTF-8 --locale-messages=en_US.UTF-8 \
     --keymap=us --timezone=America/Los_Angeles --hostname=$HOST_NAME --root-password=$ROOT_PASSWORD \
-    --root-shell=/bin/bash --kernel-command-line="root=LABEL=root rw" --setup-machine-id
+    --root-shell=/bin/bash --kernel-command-line="root=LABEL=${ROOT_LABEL} rw" --setup-machine-id
 
 # Generate an fstab using labels.
 genfstab -L -p $MOUNT_DIR >"${MOUNT_DIR}/etc/fstab"
