@@ -3,16 +3,18 @@
 set -e
 
 # User set variables.
-DISK="/dev/sda"
-MOUNT_DIR="/mnt"
-BOOT_PATH="${MOUNT_DIR}/efi"
+EFI_LABEL="efi"
+SWAP_LABEL="swap"
+ROOT_LABEL="root"
 
 EFI_SIZE="4GiB"
 SWAP_SIZE="8GiB"
 
-EFI_LABEL="efi"
-SWAP_LABEL="swap"
-ROOT_LABEL="root"
+DISK="/dev/sda"
+MOUNT_DIR="/mnt"
+ESP_PATH="/${EFI_LABEL}"
+BOOT_PATH="${MOUNT_DIR}${ESP_PATH}"
+UKI_PATH="${ESP_PATH}/EFI/Linux/vmlinuz-linux.efi"
 
 HOST_NAME="vengeance"
 ROOT_PASSWORD="changeme"
@@ -47,19 +49,29 @@ systemd-firstboot --root=$MOUNT_DIR --locale=en_US.UTF-8 --locale-messages=en_US
 # Generate an fstab using labels.
 genfstab -L -p $MOUNT_DIR >"${MOUNT_DIR}/etc/fstab"
 
-# Enable nss-myhostname instead of changing /etc/hosts.
-sed -i '/^hosts:/ s/files dns/files myhostname dns/' "${MOUNT_DIR}/etc/nsswitch.conf"
-
-# Uncomment a locale for locale-gen.
-sed -i '/en_US\.UTF-8 UTF-8/s/^#//g' "${MOUNT_DIR}/etc/locale.gen"
-
-# Uncomment the wheel group in the sudoers file.
-sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^# //g' "${MOUNT_DIR}/etc/sudoers"
-
 # Create a symbolic link for the systemd-resolved stub to resolv.conf.
 ln -sf "../run/systemd/resolve/stub-resolv.conf" "${MOUNT_DIR}/etc/resolv.conf"
 
-# Using a heredoc to inline a script to run inside of arch-chroot to configure the rest.
+# Enable nss-myhostname instead of changing /etc/hosts.
+sed -i '/^hosts: /s/files dns/files myhostname dns/' "${MOUNT_DIR}/etc/nsswitch.conf"
+
+# Uncomment a locale for locale-gen.
+sed -i '/en_US\.UTF-8 UTF-8/s/^#//' "${MOUNT_DIR}/etc/locale.gen"
+
+# Uncomment the wheel group in the sudoers file.
+sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^# //' "${MOUNT_DIR}/etc/sudoers"
+
+# Change the mkinitcpio hooks.
+sed -i '/^HOOKS=/s/[(][^)]*[)]/(systemd fsck autodetect microcode modconf kms keyboard sd-vconsole block filesystems)/' "${MOUNT_DIR}/etc/mkinitcpio.conf"
+
+# Set mkinitcpio linux.preset to generate one UKI file in the correct location.
+cat <<EOF >"${MOUNT_DIR}/etc/mkinitcpio.d/linux.preset"
+ALL_kver="${UKI_PATH}"
+PRESETS=('default')
+default_uki="${UKI_PATH}"
+EOF
+
+# Run a heredoc script inside of arch-chroot to configure the rest.
 arch-chroot $MOUNT_DIR /bin/bash <<EOF
 set -e
 
@@ -67,13 +79,14 @@ set -e
 timedatectl set-ntp true
 timedatectl set-local-rtc false
 
-# Set locale
+# Generate locale files.
 locale-gen
 
 # Add first non-root user.
-useradd -m -G wheel -s /bin/bash "${FIRST_USER}"
+useradd -m -G wheel -s /bin/bash $FIRST_USER
 echo "${FIRST_USER}:${FIRST_USER_PASSWORD}" | chpasswd
 
+# Install the linux kernel, which should run mkinitcpio once and create a UKI.
 pacman -S --noconfirm linux linux-firmware
 
 bootctl install
