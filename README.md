@@ -1,0 +1,1 @@
+This is my custom Arch linux install script. SystemD components in the "base" package are used as much as possible, to make installation quick and minimal. Creates a UKI kernel and uses systemd-boot, to make booting fast and simple. systemd-networkd and systemd-resolved are also used for networking. 
