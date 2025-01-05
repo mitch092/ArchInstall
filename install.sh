@@ -19,7 +19,7 @@ ROOT_PASSWORD="changeme"
 FIRST_USER="steven"
 FIRST_USER_PASSWORD="changeme"
 
-# Incase this is being run again, unmount previous mounts.
+# In case this is being run again, unmount previous mounts.
 umount -R $MOUNT_DIR
 swapoff -L $SWAP_LABEL
 
@@ -47,8 +47,8 @@ swapon --discard -L $SWAP_LABEL
 pacstrap -K $MOUNT_DIR base linux linux-firmware sudo vim
 
 systemd-firstboot --root=$MOUNT_DIR --locale=en_US.UTF-8 --locale-messages=en_US.UTF-8 \
-    --keymap=us --timezone=America/Los_Angeles --hostname=$HOST_NAME --root-password=$ROOT_PASSWORD \
-    --root-shell=/bin/bash --kernel-command-line="root=LABEL=${ROOT_LABEL} rw" --setup-machine-id
+    --keymap=us --timezone=America/Los_Angeles --hostname=$HOST_NAME --setup-machine-id \
+    --root-shell=/bin/bash --kernel-command-line="root=LABEL=${ROOT_LABEL} rw quiet"
 
 # Generate an fstab using labels.
 genfstab -L -p $MOUNT_DIR >"${MOUNT_DIR}/etc/fstab"
@@ -83,7 +83,8 @@ timedatectl set-local-rtc false
 # Generate locale files.
 locale-gen
 
-# Add first non-root user.
+# Add first non-root user. Also set root password (systemd-firstboot doesn't appear to set it).
+echo "root:${ROOT_PASSWORD}" | chpasswd
 useradd -m -G wheel -s /bin/bash $FIRST_USER
 echo "${FIRST_USER}:${FIRST_USER_PASSWORD}" | chpasswd
 
