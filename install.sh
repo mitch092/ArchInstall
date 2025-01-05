@@ -19,6 +19,7 @@ ROOT_PASSWORD="changeme"
 FIRST_USER="steven"
 FIRST_USER_PASSWORD="changeme"
 
+# Incase this is being run again, unmount previous mounts.
 umount -R $MOUNT_DIR
 swapoff -L $SWAP_LABEL
 
@@ -55,9 +56,6 @@ genfstab -L -p $MOUNT_DIR >"${MOUNT_DIR}/etc/fstab"
 # Create a symbolic link for the systemd-resolved stub to resolv.conf.
 ln -sf "../run/systemd/resolve/stub-resolv.conf" "${MOUNT_DIR}/etc/resolv.conf"
 
-# Enable nss-myhostname instead of changing /etc/hosts.
-sed -i '/^hosts: /s/files dns/files myhostname dns/' "${MOUNT_DIR}/etc/nsswitch.conf"
-
 # Uncomment a locale for locale-gen.
 sed -i '/en_US\.UTF-8 UTF-8/s/^#//' "${MOUNT_DIR}/etc/locale.gen"
 
@@ -89,10 +87,10 @@ locale-gen
 useradd -m -G wheel -s /bin/bash $FIRST_USER
 echo "${FIRST_USER}:${FIRST_USER_PASSWORD}" | chpasswd
 
+bootctl install
+
 # Install the linux kernel again, which should run mkinitcpio and create a UKI.
 pacman -S --noconfirm linux
-
-bootctl install
 
 # Enable various services.
 systemctl enable systemd-timesyncd.service
@@ -102,6 +100,6 @@ systemctl enable systemd-boot-update.service
 EOF
 
 # Final Steps
-umount -R $MOUNT_DIR
-swapoff -L $SWAP_LABEL
+#umount -R $MOUNT_DIR
+#swapoff -L $SWAP_LABEL
 echo "Install finished. Ready to reboot."
