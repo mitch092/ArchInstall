@@ -8,9 +8,11 @@ ROOT_PASSWORD="changeme"
 FIRST_USER="steven"
 FIRST_USER_PASSWORD="changeme"
 
+pacman -S --noconfirm linux linux-firmware
+
 # Set time and date.
 timedatectl set-ntp true
-timedatectl set-timezone America/Los_Angeles
+timedatectl set-local-rtc false
 
 # Set locale
 locale-gen
@@ -24,15 +26,9 @@ echo "root:${ROOT_PASSWORD}" | chpasswd
 useradd -m -G wheel -s /bin/bash "${FIRST_USER}"
 echo "${FIRST_USER}:${FIRST_USER_PASSWORD}" | chpasswd
 
-pacman -Syu --noconfirm
-pacman -S --noconfirm grub efibootmgr base-devel git util-linux networkmanager \
-	pipewire pipewire-audio wireplumber gptfdisk sddm plasma-meta reflector \
-	openssh man systemd-resolvconf cups print-manager qt5-declarative flatpak
-
+bootctl install
 
 # Enable various services.
+systemctl enable systemd-networkd.service
 systemctl enable systemd-resolved.service
-systemctl enable NetworkManager.service
-systemctl enable fstrim.timer
-systemctl enable sddm.service
-
+systemctl enable systemd-boot-update.service
