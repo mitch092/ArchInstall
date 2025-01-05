@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 # User set variables.
 EFI_LABEL="efi"
 SWAP_LABEL="swap"
@@ -20,6 +18,11 @@ HOST_NAME="vengeance"
 ROOT_PASSWORD="changeme"
 FIRST_USER="steven"
 FIRST_USER_PASSWORD="changeme"
+
+umount -R $MOUNT_DIR
+swapoff -L $SWAP_LABEL
+
+set -e
 
 # Partition Disk
 sgdisk --zap-all --clear \
@@ -40,7 +43,7 @@ mount -L $EFI_LABEL $BOOT_PATH
 swapon --discard -L $SWAP_LABEL
 
 # Install Base System
-pacstrap -K $MOUNT_DIR base sudo vim
+pacstrap -K $MOUNT_DIR base linux linux-firmware sudo vim
 
 systemd-firstboot --root=$MOUNT_DIR --locale=en_US.UTF-8 --locale-messages=en_US.UTF-8 \
     --keymap=us --timezone=America/Los_Angeles --hostname=$HOST_NAME --root-password=$ROOT_PASSWORD \
@@ -66,7 +69,7 @@ sed -i '/^HOOKS=/s/[(][^)]*[)]/(systemd fsck autodetect microcode modconf kms ke
 
 # Use a heredoc to set mkinitcpio linux.preset to generate one UKI file in the correct location.
 cat <<EOF >"${MOUNT_DIR}/etc/mkinitcpio.d/linux.preset"
-ALL_kver="${UKI_PATH}"
+ALL_kver="/boot/vmlinuz-linux"
 PRESETS=('default')
 default_uki="${UKI_PATH}"
 EOF
@@ -86,8 +89,8 @@ locale-gen
 useradd -m -G wheel -s /bin/bash $FIRST_USER
 echo "${FIRST_USER}:${FIRST_USER_PASSWORD}" | chpasswd
 
-# Install the linux kernel, which should run mkinitcpio once and create a UKI.
-pacman -S --noconfirm linux linux-firmware
+# Install the linux kernel again, which should run mkinitcpio and create a UKI.
+pacman -S --noconfirm linux
 
 bootctl install
 
