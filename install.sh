@@ -40,7 +40,7 @@ mount -L $EFI_LABEL $BOOT_PATH
 swapon --discard -L $SWAP_LABEL
 
 # Install Base System
-pacstrap -K $MOUNT_DIR base sudo
+pacstrap -K $MOUNT_DIR base sudo vim
 
 systemd-firstboot --root=$MOUNT_DIR --locale=en_US.UTF-8 --locale-messages=en_US.UTF-8 \
     --keymap=us --timezone=America/Los_Angeles --hostname=$HOST_NAME --root-password=$ROOT_PASSWORD \
