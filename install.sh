@@ -64,7 +64,7 @@ sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^# //' "${MOUNT_DIR}/etc/sudoers"
 # Change the mkinitcpio hooks.
 sed -i '/^HOOKS=/s/[(][^)]*[)]/(systemd fsck autodetect microcode modconf kms keyboard sd-vconsole block filesystems)/' "${MOUNT_DIR}/etc/mkinitcpio.conf"
 
-# Set mkinitcpio linux.preset to generate one UKI file in the correct location.
+# Use a heredoc to set mkinitcpio linux.preset to generate one UKI file in the correct location.
 cat <<EOF >"${MOUNT_DIR}/etc/mkinitcpio.d/linux.preset"
 ALL_kver="${UKI_PATH}"
 PRESETS=('default')
